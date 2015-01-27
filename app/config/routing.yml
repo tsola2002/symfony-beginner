@@ -1,10 +1,10 @@
 bookkeeper_manager:
     resource: "@BookkeeperManagerBundle/Resources/config/routing.yml"
-    prefix:   /
+    prefix:   /book
 
 bookkeeper_hello_world:
     resource: "@BookkeeperHelloWorldBundle/Resources/config/routing.yml"
-    prefix:   /book
+    prefix:   /
 
 app:
     resource: @AppBundle/Controller/
