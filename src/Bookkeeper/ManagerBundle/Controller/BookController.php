@@ -11,11 +11,21 @@ use Bookkeeper\ManagerBundle\Form\BookType;
 class BookController extends Controller {
 
     public function indexAction() {
-        return $this->render('BookkeeperManagerBundle:Book:index.html.twig');
+        $em = $this->getDoctrine()->getManager();
+        $books = $em->getRepository('BookkeeperManagerBundle:Book')->findAll();
+
+        return $this->render('BookkeeperManagerBundle:Book:index.html.twig', array(
+            'books'=>$books
+        ));
     }
 
     public function showAction($id) {
-        return $this->render('BookkeeperManagerBundle:Book:show.html.twig');
+        $em = $this->getDoctrine()->getManager();
+        $book = $em->getRepository('BookkeeperManagerBundle:Book')->find($id);
+
+        return $this->render('BookkeeperManagerBundle:Book:show.html.twig', array(
+            'book'=>$book
+        ));
     }
 
     public function newAction() {
@@ -52,7 +62,7 @@ class BookController extends Controller {
 
             $this->get('session')->getFlashBag()->add('msg', 'Your book has been created!');
 
-            return $this->redirect($this->generateUrl('book_show'));
+            return $this->redirect($this->generateUrl('book_show', array('id'=>$book->getId())));
         }
 
         $this->get('session')->getFlashBag()->add('msg', 'Oops! Something went wrong.');
@@ -63,12 +73,46 @@ class BookController extends Controller {
     }
 
     public function editAction($id) {
-        return $this->render('BookkeeperManagerBundle:Book:edit.html.twig');
+        $em = $this->getDoctrine()->getManager();
+        $book = $em->getRepository('BookkeeperManagerBundle:Book')->find($id);
+
+        $form = $this->createForm(new BookType(), $book, array(
+            'action'=>$this->generateUrl('book_update', array('id'=>$book->getId())),
+            'method'=>'PUT'
+        ));
+        $form->add('submit', 'submit', array('label'=>'Update Book'));
+
+        return $this->render('BookkeeperManagerBundle:Book:edit.html.twig', array(
+            'form'=>$form->createView()
+        ));
     }
 
     public function updateAction(Request $request, $id) {
+        $em = $this->getDoctrine()->getManager();
+        $book = $em->getRepository('BookkeeperManagerBundle:Book')->find($id);
+
+        $form = $this->createForm(new BookType(), $book, array(
+            'action'=>$this->generateUrl('book_update', array('id'=>$book->getId())),
+            'method'=>'PUT'
+        ));
+        $form->add('submit', 'submit', array('label'=>'Update Book'));
+
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $em->flush();
+
+            $this->get('session')->getFlashBag()->add('msg', 'Your book has been updated');
+
+            return $this->redirect($this->generateUrl('book_show', array('id'=>$id)));
+        }
+
+        return $this->render('BookkeeperManagerBundle:Book:edit.html.twig', array(
+            'form'=>$form->createView()
+        ));
     }
 
     public function deleteAction(Request $request, $id) {
+
     }
 }
